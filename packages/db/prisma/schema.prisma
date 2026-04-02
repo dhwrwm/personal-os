@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model Item {
+  id        String   @id @default(uuid())
+  type      ItemType
+  title     String
+  content   String?
+  metadata  Json?
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  job         Job?
+  transaction Transaction?
+  note        Note?
+  todo        Todo?
+  bookmark    Bookmark?
+}
+
+enum ItemType {
+  job
+  transaction
+  note
+  todo
+  bookmark
+}
+
+model Job {
+  id        String   @id @default(uuid())
+  itemId    String   @unique
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  company   String
+  role      String
+  status    JobStatus
+  source    String?
+  link      String?
+  appliedAt DateTime?
+}
+
+enum JobStatus {
+  applied
+  interview
+  offer
+  rejected
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  itemId    String   @unique
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  amount    Float
+  category  String
+  date      DateTime
+  type      TransactionType
+}
+
+enum TransactionType {
+  income
+  expense
+}
+
+model Note {
+  id     String @id @default(uuid())
+  itemId String @unique
+  content String
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model Todo {
+  id        String   @id @default(uuid())
+  itemId    String   @unique
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  completed Boolean  @default(false)
+  dueDate   DateTime?
+  priority  TodoPriority @default(medium)
+}
+
+enum TodoPriority {
+  low
+  medium
+  high
+}
+
+model Bookmark {
+  id     String @id @default(uuid())
+  itemId String @unique
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  url    String
+}
