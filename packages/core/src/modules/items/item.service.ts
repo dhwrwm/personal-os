@@ -1,8 +1,15 @@
 import { prisma } from "@db";
-import type { Prisma } from "@prisma/client";
 
 import { validateCreateItemInput, validateUpdateItemInput } from "./item.validators";
 import type { CreateItemInput, ItemListRecord, UpdateItemInput } from "./item.types";
+
+function toJsonValue(value: Record<string, unknown> | undefined) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return JSON.parse(JSON.stringify(value));
+}
 
 async function getUserItemOrThrow(userId: string, itemId: string) {
   return prisma.item.findFirstOrThrow({
@@ -45,7 +52,7 @@ export async function createItem(
       type: input.type,
       title: input.title,
       content: input.content,
-      metadata: (input.metadata ?? {}) as Prisma.InputJsonValue,
+      metadata: toJsonValue(input.metadata ?? {}),
       tags: input.tags ?? [],
       userId,
       ...(input.job
@@ -143,7 +150,7 @@ export async function updateItem(
       ...(input.content !== undefined ? { content: input.content } : {}),
       ...(input.tags !== undefined ? { tags: input.tags } : {}),
       ...(input.metadata !== undefined
-        ? { metadata: input.metadata as Prisma.InputJsonValue }
+        ? { metadata: toJsonValue(input.metadata) }
         : {}),
       ...(input.job
         ? {
