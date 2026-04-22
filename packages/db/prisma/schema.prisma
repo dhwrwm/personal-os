@@ -17,12 +17,24 @@ model Item {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Relations
   job         Job?
   transaction Transaction?
   note        Note?
   todo        Todo?
   bookmark    Bookmark?
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  items     Item[]
 }
 
 enum ItemType {

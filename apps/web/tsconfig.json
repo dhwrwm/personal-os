@@ -5,7 +5,10 @@
     "jsx": "react-jsx",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@db": ["../../packages/db/index.ts"],
+      "@db/*": ["../../packages/db/*"],
+      "@core/*": ["../../packages/core/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
