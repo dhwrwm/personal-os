@@ -4,23 +4,11 @@ import type { Prisma } from "@prisma/client";
 import { validateCreateItemInput, validateUpdateItemInput } from "./item.validators";
 import type { CreateItemInput, ItemListRecord, UpdateItemInput } from "./item.types";
 
-const DEMO_USER_EMAIL = "test@example.com";
-
-async function getOrCreateDefaultUser() {
-  return prisma.user.upsert({
-    where: { email: DEMO_USER_EMAIL },
-    update: {},
-    create: { email: DEMO_USER_EMAIL },
-  });
-}
-
-async function getUserItemOrThrow(itemId: string) {
-  const user = await getOrCreateDefaultUser();
-
+async function getUserItemOrThrow(userId: string, itemId: string) {
   return prisma.item.findFirstOrThrow({
     where: {
       id: itemId,
-      userId: user.id,
+      userId,
     },
     include: {
       job: true,
@@ -32,11 +20,9 @@ async function getUserItemOrThrow(itemId: string) {
   });
 }
 
-export async function listItems(): Promise<ItemListRecord[]> {
-  const user = await getOrCreateDefaultUser();
-
+export async function listItems(userId: string): Promise<ItemListRecord[]> {
   return prisma.item.findMany({
-    where: { userId: user.id },
+    where: { userId },
     include: {
       job: true,
       transaction: true,
@@ -48,8 +34,10 @@ export async function listItems(): Promise<ItemListRecord[]> {
   });
 }
 
-export async function createItem(rawInput: unknown): Promise<ItemListRecord> {
-  const user = await getOrCreateDefaultUser();
+export async function createItem(
+  userId: string,
+  rawInput: unknown,
+): Promise<ItemListRecord> {
   const input: CreateItemInput = validateCreateItemInput(rawInput);
 
   const item = await prisma.item.create({
@@ -59,7 +47,7 @@ export async function createItem(rawInput: unknown): Promise<ItemListRecord> {
       content: input.content,
       metadata: (input.metadata ?? {}) as Prisma.InputJsonValue,
       tags: input.tags ?? [],
-      userId: user.id,
+      userId,
       ...(input.job
         ? {
             job: {
@@ -141,10 +129,11 @@ export async function createItem(rawInput: unknown): Promise<ItemListRecord> {
 }
 
 export async function updateItem(
+  userId: string,
   itemId: string,
   rawInput: unknown,
 ): Promise<ItemListRecord> {
-  const existingItem = await getUserItemOrThrow(itemId);
+  const existingItem = await getUserItemOrThrow(userId, itemId);
   const input: UpdateItemInput = validateUpdateItemInput(rawInput);
 
   const item = await prisma.item.update({
@@ -195,8 +184,8 @@ export async function updateItem(
   return item;
 }
 
-export async function deleteItem(itemId: string): Promise<void> {
-  const existingItem = await getUserItemOrThrow(itemId);
+export async function deleteItem(userId: string, itemId: string): Promise<void> {
+  const existingItem = await getUserItemOrThrow(userId, itemId);
 
   await prisma.item.delete({
     where: { id: existingItem.id },
