@@ -1,6 +1,35 @@
+# dependencies
 node_modules
+
+# env files
 .env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# build outputs
 .next
 dist
-/generated/prisma
-**/.git
+out
+build
+
+# turborepo
+.turbo
+
+# OS files
+.DS_Store
+
+# IDE
+.vscode
+.idea
+
+# prisma
+prisma/migrations
+apps/api/src/generated/prisma
+
+# docker
+docker-data
