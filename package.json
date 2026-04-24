@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter web dev",
-    "build": "pnpm --filter web build",
+    "build": "pnpm prisma:generate && pnpm --filter web build",
+    "postinstall": "pnpm prisma:generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"
   },
