@@ -3,7 +3,6 @@
 A unified platform to manage:
 
 - Job applications
-- Transactions
 - Notes
 - Todos
 - Bookmarks
