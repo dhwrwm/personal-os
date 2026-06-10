@@ -40,6 +40,39 @@ model User {
   items         Item[]
   sessions      Session[]
   accounts      Account[]
+  jobAlerts     JobAlert[]
+}
+
+model JobAlert {
+  id            String    @id @default(uuid())
+  userId        String
+  site          String
+  keywords      String[]
+  location      String?
+  isActive      Boolean   @default(true)
+  lastCheckedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  results JobAlertResult[]
+
+  @@index([userId])
+}
+
+model JobAlertResult {
+  id      String    @id @default(uuid())
+  alertId String
+  title   String
+  url     String
+  snippet String?
+  foundAt DateTime  @default(now())
+  seenAt  DateTime?
+
+  alert JobAlert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@unique([alertId, url])
+  @@index([alertId])
 }
 
 model Session {
